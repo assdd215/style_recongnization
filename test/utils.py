@@ -4,7 +4,8 @@ import requests
 import requests.exceptions as reExceptions
 from PIL import Image
 import os
-
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 def changeRawToJson(str):
     s1 = "{\""

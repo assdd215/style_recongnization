@@ -49,7 +49,6 @@ def get_files(file_dir, ratio):
     val_images = all_image_list[int(n_train):-1]
     val_labels = all_label_list[int(n_train):-1]
     val_labels = [int(float(i)) for i in val_labels]
-
     return tra_images,tra_labels,val_images,val_labels
 
 
@@ -98,57 +97,109 @@ def get_batch(image, label, image_W, image_H, batch_size, capacity):
 
     return image_batch, label_batch       #一个批量的图片batch和label batch  图片为[-1,width,height,channels]  label为[batch_size,1]
 
-def get_img_files(file_dir,ratio):
-    label_wild = []
-    wild = []
-    label_cute = []
-    cute = []
-    label_cold = []
-    cold = []
-    # for file in os.listdir("/Users/aria/MyDocs/pics/2_狂野/"):
-    #     if file == '.DS'
+def get_img_files():
+    train_imgs = []
+    train_labels = []
+    test_imgs = []
+    test_labels = []
 
-# TEST
-# To test the generated batches of images
-# When training the model, Do comment the following codes
+    ##制作训练集
+    filePath = "/Users/aria/MyDocs/pics/train/2_狂野/"
+    for file in os.listdir(filePath):
+        if file == '.DS_Store':
+            continue
+        train_imgs.append(filePath + file)
+        train_labels.append([1,0,0,0])
+    filePath = "/Users/aria/MyDocs/pics/train/4_甜美/"
 
+    for file in os.listdir(filePath):
+        if file == '.DS_Store':
+            continue
+        train_imgs.append(filePath + file)
+        train_labels.append([0,1,0,0])
 
-#import matplotlib.pyplot as plt
-#
-#BATCH_SIZE = 2
-#CAPACITY = 256
-#IMG_W = 208
-#IMG_H = 208
-#
-#train_dir = '/home/acrobat/DataSets/cats_vs_dogs/train/'
-#ratio = 0.2
-#tra_images, tra_labels, val_images, val_labels = get_files(train_dir, ratio)
-#tra_image_batch, tra_label_batch = get_batch(tra_images, tra_labels, IMG_W, IMG_H, BATCH_SIZE, CAPACITY)
-#
-#
-#
-#with tf.Session() as sess:
-#    i = 0
-#    coord = tf.train.Coordinator()
-#    threads = tf.train.start_queue_runners(coord=coord)
-#
-#    try:
-#        while not coord.should_stop() and i<1:
-#
-#            img, label = sess.run([tra_image_batch, tra_label_batch])
-#
-#            # just test one batch
-#            for j in np.arange(BATCH_SIZE):
-#                print('label: %d' %label[j])
-#                plt.imshow(img[j,:,:,:])
-#                plt.show()
-#            i+=1
-#
-#    except tf.errors.OutOfRangeError:
-#        print('done!')
-#    finally:
-#        coord.request_stop()
-#    coord.join(threads)
+    filePath = "/Users/aria/MyDocs/pics/train/5_小清新/"
+    for file in os.listdir(filePath):
+        if file == '.DS_Store':
+            continue
+        train_imgs.append(filePath + file)
+        train_labels.append([0,0,1,0])
+
+    filePath = "/Users/aria/MyDocs/pics/train/6_冷艳/"
+    for file in os.listdir(filePath):
+        if file == '.DS_Store':
+            continue
+        train_imgs.append(filePath + file)
+        train_labels.append([0,0,0,1])
 
 
+    result_img = np.array(train_imgs)
+    result_labels = np.array(train_labels)
+
+    ##制作测试集
+
+    filePath = "/Users/aria/MyDocs/pics/test/2_狂野/"
+    for file in os.listdir(filePath):
+        if file == '.DS_Store':
+            continue
+        test_imgs.append(filePath + file)
+        test_labels.append([1,0,0,0])
+
+    filePath = "/Users/aria/MyDocs/pics/test/4_甜美/"
+    for file in os.listdir(filePath):
+        if file == '.DS_Store':
+            continue
+        test_imgs.append(filePath + file)
+        test_labels.append([0,1,0,0])
+
+    filePath = "/Users/aria/MyDocs/pics/test/5_小清新/"
+    for file in os.listdir(filePath):
+        if file == '.DS_Store':
+            continue
+        test_imgs.append(filePath + file)
+        test_labels.append([0,0,1,0])
+
+    filePath = "/Users/aria/MyDocs/pics/test/6_冷艳/"
+    for file in os.listdir(filePath):
+        if file == '.DS_Store':
+            continue
+        test_imgs.append(filePath + file)
+        test_labels.append([1,0,0,0])
+
+    result_img_test = np.array(test_imgs)
+    result_labels_test = np.array(test_labels)
+
+    return result_img,result_labels,result_img_test,result_labels_test
+
+def get_img_batch(imgs,labels,w = 256,h = 256,batch_size = 32,capacity = 2000):
+    image = tf.cast(imgs,dtype=tf.string)
+    label = tf.convert_to_tensor(labels,dtype=tf.int16)
+    input_queue = tf.train.slice_input_producer([image,label],shuffle=True)#这个函数的功能还是不太懂
+    label = input_queue[1]
+    image_str = input_queue[0]
+    image_content = tf.read_file(input_queue[0])
+    image = tf.image.decode_jpeg(image_content,channels=3)
+    image = tf.image.resize_image_with_crop_or_pad(image,w,h)
+    image_str_batch,image_batch,label_batch = tf.train.shuffle_batch([image_str,image,label],
+                                                                     batch_size=batch_size,num_threads=64,
+                                                                     capacity=capacity,min_after_dequeue=capacity - 1)
+    image_batch = tf.cast(image_batch,tf.float32)
+    return image_batch,label_batch
+
+
+
+
+# imgs,labels = get_img_files()
+#
+# image_batch , label_batch = get_img_batch(imgs,labels)
+#
+# sess = tf.Session()
+# sess.run(tf.global_variables_initializer())
+# coord = tf.train.Coordinator()
+# threads = tf.train.start_queue_runners(sess=sess,coord=coord)
+#
+# for i in range(4):
+#     batch,result = sess.run((image_batch,label_batch))
+#     # print(batch)
+#     print(result)
 
