@@ -54,6 +54,8 @@ with tf.name_scope('input'):
 with tf.name_scope("conv1"):
     conv1_weight = weight_variable([3,3,3,16],name="conv1_W")
     conv1_biases = biases_variable([16],name='conv1_b')
+    tf.summary.histogram("conv1/W",conv1_weight)
+    tf.summary.histogram("conv1/b",conv1_biases)
     # conv1 = tf.nn.relu(conv2d(x,conv1_weight) + conv1_biases)
     conv1 = tf.nn.relu(tf.nn.bias_add(conv2d(x,conv1_weight),conv1_biases),name="conv1")
 #第一层池化
@@ -64,6 +66,8 @@ with tf.name_scope("pool1"):
 with tf.name_scope('conv2'):
     conv2_weight = weight_variable([5,5,16,16],name="conv2_W")
     conv2_biases = biases_variable([16],name="conv2_b")
+    tf.summary.histogram("conv2/W",conv2_weight)
+    tf.summary.histogram("conv2/b",conv2_biases)
     # conv2 = tf.nn.relu(conv2d(norm1,conv2_weight) + conv2_biases)
     conv2 = tf.nn.relu(tf.nn.bias_add(conv2d(norm1,conv2_weight),conv2_biases),name='conv2')
 #第二层池化
@@ -76,6 +80,8 @@ with tf.name_scope('fc1'):
     pool2_flat = tf.reshape(norm2,[BATCH_SIZE,-1])
     fc1_weight = weight_variable([pool2_flat.get_shape()[1].value,128],stddev=0.005,name='fc1_W')
     fc1_biases = biases_variable([128],name="fc1_b")
+    tf.summary.histogram("fc1/W",fc1_weight)
+    tf.summary.histogram("fc1/b",fc1_biases)
     fc1 = tf.nn.relu(tf.matmul(pool2_flat,fc1_weight) + fc1_biases)  #[64,128]
 
 #第二层全连接层
@@ -88,12 +94,16 @@ with tf.name_scope('fc1'):
 with tf.name_scope('softmax'):
     soft_weight = weight_variable([128,4],name="softmax_W")
     soft_biases = biases_variable([4],name="softmax_b")
+    tf.summary.histogram("softmax/W",soft_weight)
+    tf.summary.histogram("softmax/b",soft_biases)
     # softmax = tf.matmul(fc1, soft_weight) + soft_biases
     softmax = tf.add(tf.matmul(fc1, soft_weight), soft_biases, name="softmax")
+    # tf.summary.scalar("softmax",softmax)
 
 with tf.name_scope('loss'):
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=softmax, labels=y_)
     loss = tf.reduce_mean(cross_entropy,name="loss")
+    tf.summary.scalar("loss",loss)
 
 with tf.name_scope("train"):
     global_step = tf.Variable(0, name='global_step', trainable=False)
@@ -104,6 +114,7 @@ with tf.name_scope("acc"):
     correct = tf.equal(tf.argmax(softmax,axis=1), tf.argmax(y_,axis=1))
     correct = tf.cast(correct,tf.float32)
     acc = tf.reduce_mean(correct,name="acc")
+    tf.summary.scalar("acc",acc)
 
 saver = tf.train.Saver()
 sess = tf.Session()

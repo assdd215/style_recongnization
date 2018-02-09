@@ -2,3 +2,4 @@ logs/
 .idea
 *.pyc
 result_model/
+checkpoint_dir/
