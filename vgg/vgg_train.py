@@ -87,6 +87,8 @@ BATCH_SIZE = 32
 CAPACITY = 2000
 MAX_STEP = 1000
 
+# npyPath = "/Users/aria/MyDocs/npy/vgg16.npy"
+npyPath = "D:\\train_data\\npy\\vgg16.npy"
 def train():
     train, train_label, test_img, test_label = input_data.get_img_files()
     train_batch, train_label_batch = input_data.get_img_batch(train, train_label, w=IMG_W, h=IMG_H,
@@ -94,7 +96,7 @@ def train():
     test_batch, test_label_batch = input_data.get_img_batch(test_img, test_label, w=IMG_W, h=IMG_H,
                                                             batch_size=BATCH_SIZE, capacity=CAPACITY)
 
-    vgg = Vgg16("/Users/aria/MyDocs/npy/vgg16.npy")
+    vgg = Vgg16(npyPath)
     sess = tf.Session()
     writer = tf.summary.FileWriter('graph/', sess.graph)
     sess.run(tf.global_variables_initializer())

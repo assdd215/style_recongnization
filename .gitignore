@@ -3,3 +3,4 @@ logs/
 *.pyc
 result_model/
 checkpoint_dir/
+vgg/graph/
