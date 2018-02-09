@@ -13,13 +13,12 @@ IMG_H = 256
 RATIO = 0.2     # take 20% of dataset as validation data
 BATCH_SIZE = 16
 CAPACITY = 2000
-MAX_STEP = 500 # with current parameters, it is suggested to use MAX_STEP>10k
-learning_rate = 0.0001 # with current parameters, it is suggested to use learning rate<0.0001
+MAX_STEP = 1000 # with current parameters, it is suggested to use MAX_STEP>10k
+learning_rate = 0.00075 # with current parameters, it is suggested to use learning rate<0.0001
 
 
 def weigth_xavier_variable(shape):
     return tf.get_variable(shape=shape,initializer=tf.contrib.layers.xavier_initializer())
-learning_rate = 0.001 # with current parameters, it is suggested to use learning rate<0.0001
 
 def weight_variable(shape,name="weight",stddev = 0.1):  #stddev  表示标准差
     initializer = tf.contrib.layers.xavier_initializer()
