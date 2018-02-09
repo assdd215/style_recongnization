@@ -104,13 +104,13 @@ def get_img_files():
     test_labels = []
 
     ##制作训练集
-    filePath = "/Users/aria/MyDocs/pics/train/2_狂野/"
+    filePath = "D:\\train_data\\train\\2_狂野\\"
     for file in os.listdir(filePath):
         if file == '.DS_Store':
             continue
         train_imgs.append(filePath + file)
         train_labels.append([1,0,0,0])
-    filePath = "/Users/aria/MyDocs/pics/train/4_甜美/"
+    filePath = "D:\\train_data\\train\\4_甜美\\"
 
     for file in os.listdir(filePath):
         if file == '.DS_Store':
@@ -118,14 +118,14 @@ def get_img_files():
         train_imgs.append(filePath + file)
         train_labels.append([0,1,0,0])
 
-    filePath = "/Users/aria/MyDocs/pics/train/5_小清新/"
+    filePath = "D:\\train_data\\train\\5_小清新\\"
     for file in os.listdir(filePath):
         if file == '.DS_Store':
             continue
         train_imgs.append(filePath + file)
         train_labels.append([0,0,1,0])
 
-    filePath = "/Users/aria/MyDocs/pics/train/6_冷艳/"
+    filePath = "D:\\train_data\\train\\6_冷艳\\"
     for file in os.listdir(filePath):
         if file == '.DS_Store':
             continue
@@ -138,28 +138,28 @@ def get_img_files():
 
     ##制作测试集
 
-    filePath = "/Users/aria/MyDocs/pics/test/2_狂野/"
+    filePath = "D:\\train_data\\train\\2_狂野\\"
     for file in os.listdir(filePath):
         if file == '.DS_Store':
             continue
         test_imgs.append(filePath + file)
         test_labels.append([1,0,0,0])
 
-    filePath = "/Users/aria/MyDocs/pics/test/4_甜美/"
+    filePath = "D:\\train_data\\train\\4_甜美\\"
     for file in os.listdir(filePath):
         if file == '.DS_Store':
             continue
         test_imgs.append(filePath + file)
         test_labels.append([0,1,0,0])
 
-    filePath = "/Users/aria/MyDocs/pics/test/5_小清新/"
+    filePath = "D:\\train_data\\train\\5_小清新\\"
     for file in os.listdir(filePath):
         if file == '.DS_Store':
             continue
         test_imgs.append(filePath + file)
         test_labels.append([0,0,1,0])
 
-    filePath = "/Users/aria/MyDocs/pics/test/6_冷艳/"
+    filePath = "D:\\train_data\\train\\6_冷艳\\"
     for file in os.listdir(filePath):
         if file == '.DS_Store':
             continue
