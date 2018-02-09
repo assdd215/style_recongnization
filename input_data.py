@@ -7,6 +7,8 @@ import math
 # you need to change this to your data directory
 train_dir = '/Users/aria/MyDocs/cat_vs_dogs/'
 
+
+
 def get_files(file_dir, ratio):
     """
     Args:
@@ -97,74 +99,91 @@ def get_batch(image, label, image_W, image_H, batch_size, capacity):
 
     return image_batch, label_batch       #一个批量的图片batch和label batch  图片为[-1,width,height,channels]  label为[batch_size,1]
 
+baseFilePath = '/Users/aria/MyDocs/pics/'
+
+def load_style_and_path(imgs,labels,filePath,shape):
+    filePath = filePath + "/"
+    for file in os.listdir(filePath):
+        if file == '.DS_Store':
+            continue
+        imgs.append(filePath + file)
+        labels.append(shape)
+
 def get_img_files():
     train_imgs = []
     train_labels = []
     test_imgs = []
     test_labels = []
 
+    load_style_and_path(train_imgs, train_labels, str(baseFilePath + "train/2_狂野"), [1, 0, 0, 0])
     ##制作训练集
-    filePath = "D:\\train_data\\train\\2_狂野\\"
-    for file in os.listdir(filePath):
-        if file == '.DS_Store':
-            continue
-        train_imgs.append(filePath + file)
-        train_labels.append([1,0,0,0])
-    filePath = "D:\\train_data\\train\\4_甜美\\"
+    # filePath = "D:\\train_data\\train\\2_狂野\\"
+    # for file in os.listdir(filePath):
+    #     if file == '.DS_Store':
+    #         continue
+    #     train_imgs.append(filePath + file)
+    #     train_labels.append([1,0,0,0])
 
-    for file in os.listdir(filePath):
-        if file == '.DS_Store':
-            continue
-        train_imgs.append(filePath + file)
-        train_labels.append([0,1,0,0])
 
-    filePath = "D:\\train_data\\train\\5_小清新\\"
-    for file in os.listdir(filePath):
-        if file == '.DS_Store':
-            continue
-        train_imgs.append(filePath + file)
-        train_labels.append([0,0,1,0])
+    load_style_and_path(train_imgs, train_labels, str(baseFilePath + "train/4_甜美"), [0, 1, 0, 0])
+    # filePath = "D:\\train_data\\train\\4_甜美\\"
+    # for file in os.listdir(filePath):
+    #     if file == '.DS_Store':
+    #         continue
+    #     train_imgs.append(filePath + file)
+    #     train_labels.append([0,1,0,0])
 
-    filePath = "D:\\train_data\\train\\6_冷艳\\"
-    for file in os.listdir(filePath):
-        if file == '.DS_Store':
-            continue
-        train_imgs.append(filePath + file)
-        train_labels.append([0,0,0,1])
+    load_style_and_path(train_imgs,train_labels,str(baseFilePath + "train/5_小清新"),[0,0,1,0])
+    # filePath = "D:\\train_data\\train\\5_小清新\\"
+    # for file in os.listdir(filePath):
+    #     if file == '.DS_Store':
+    #         continue
+    #     train_imgs.append(filePath + file)
+    #     train_labels.append([0,0,1,0])
 
+    load_style_and_path(train_imgs,train_labels,baseFilePath + "train/6_冷艳",[0,0,0,1])
+    # filePath = "D:\\train_data\\train\\6_冷艳\\"
+    # for file in os.listdir(filePath):
+    #     if file == '.DS_Store':
+    #         continue
+    #     train_imgs.append(filePath + file)
+    #     train_labels.append([0,0,0,1])
 
     result_img = np.array(train_imgs)
     result_labels = np.array(train_labels)
 
     ##制作测试集
+    load_style_and_path(test_imgs, test_labels, baseFilePath + "test/2_狂野", [1, 0, 0, 0])
+    # filePath = "D:\\train_data\\train\\2_狂野\\"
+    # for file in os.listdir(filePath):
+    #     if file == '.DS_Store':
+    #         continue
+    #     test_imgs.append(filePath + file)
+    #     test_labels.append([1,0,0,0])
 
-    filePath = "D:\\train_data\\train\\2_狂野\\"
-    for file in os.listdir(filePath):
-        if file == '.DS_Store':
-            continue
-        test_imgs.append(filePath + file)
-        test_labels.append([1,0,0,0])
+    load_style_and_path(test_imgs, test_labels, baseFilePath + "test/4_甜美", [0, 1, 0, 0])
+    # filePath = "D:\\train_data\\train\\4_甜美\\"
+    # for file in os.listdir(filePath):
+    #     if file == '.DS_Store':
+    #         continue
+    #     test_imgs.append(filePath + file)
+    #     test_labels.append([0,1,0,0])
 
-    filePath = "D:\\train_data\\train\\4_甜美\\"
-    for file in os.listdir(filePath):
-        if file == '.DS_Store':
-            continue
-        test_imgs.append(filePath + file)
-        test_labels.append([0,1,0,0])
+    load_style_and_path(test_imgs, test_labels, baseFilePath + "test/5_小清新", [0, 0, 1, 0])
+    # filePath = "D:\\train_data\\train\\5_小清新\\"
+    # for file in os.listdir(filePath):
+    #     if file == '.DS_Store':
+    #         continue
+    #     test_imgs.append(filePath + file)
+    #     test_labels.append([0,0,1,0])
 
-    filePath = "D:\\train_data\\train\\5_小清新\\"
-    for file in os.listdir(filePath):
-        if file == '.DS_Store':
-            continue
-        test_imgs.append(filePath + file)
-        test_labels.append([0,0,1,0])
+    load_style_and_path(test_imgs, test_labels, baseFilePath + "test/6_冷艳", [0, 0, 0, 1])
 
-    filePath = "D:\\train_data\\train\\6_冷艳\\"
-    for file in os.listdir(filePath):
-        if file == '.DS_Store':
-            continue
-        test_imgs.append(filePath + file)
-        test_labels.append([1,0,0,0])
+    # for file in os.listdir(filePath):
+    #     if file == '.DS_Store':
+    #         continue
+    #     test_imgs.append(filePath + file)
+    #     test_labels.append([1,0,0,0])
 
     result_img_test = np.array(test_imgs)
     result_labels_test = np.array(test_labels)

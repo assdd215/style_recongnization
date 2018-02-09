@@ -4,6 +4,7 @@ import numpy as np
 
 
 
+
 x = tf.placeholder(shape=[2,4],dtype=tf.int32)
 y = tf.placeholder(shape=[2,4],dtype=tf.int32)
 z1 = tf.argmax(x,axis=1)

@@ -89,7 +89,7 @@ with tf.name_scope('fc1'):
 #     fc2_biases = biases_variable([128],name='fc2_b')
 #     fc2 = tf.nn.relu(tf.matmul(fc1,fc2_weight) + fc2_biases)  #[64，128]
 
-#softmax层  [64,2]
+#softmax层  [128,4]
 with tf.name_scope('softmax'):
     soft_weight = weight_variable([128,4],name="softmax_W")
     soft_biases = biases_variable([4],name="softmax_b")
