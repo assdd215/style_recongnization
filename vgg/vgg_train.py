@@ -64,7 +64,6 @@ class Vgg16:
         self.merged = tf.summary.merge_all()
 
 
-
     def conv_layer(self,bottom,name):
         with tf.name_scope(name=name):
             conv = tf.nn.conv2d(bottom,self.data_dict[name][0],[1,1,1,1],padding='SAME',name=name)
@@ -87,8 +86,8 @@ BATCH_SIZE = 32
 CAPACITY = 2000
 MAX_STEP = 5000
 
-# npyPath = "/Users/aria/MyDocs/npy/vgg16.npy"
-npyPath = "D:\\train_data\\npy\\vgg16.npy"
+npyPath = "/Users/aria/MyDocs/npy/vgg16.npy"
+# npyPath = "D:\\train_data\\npy\\vgg16.npy"
 def train():
     train, train_label, test_img, test_label = input_data.get_img_files()
     train_batch, train_label_batch = input_data.get_img_batch(train, train_label, w=IMG_W, h=IMG_H,
@@ -123,5 +122,31 @@ def train():
         coord.request_stop()
     coord.join(threads)
 
+def predict():
+    picPath = "391.jpg"
+    # img = input_data.get_one_img(picPath,IMG_W,IMG_H)
+    # img = tf.image.per_image_standardization(img)
+    vgg = Vgg16(npyPath)
+    saver = tf.train.Saver()
+    sess = tf.Session()
+    sess.run(tf.global_variables_initializer())
+    '''
+    这里可以写加载模型
+    #      with tf.Session() as sess:
+   #
+   #          print("Reading checkpoints...")
+   #          ckpt = tf.train.get_checkpoint_state(train_logs_dir)
+   #          if ckpt and ckpt.model_checkpoint_path:
+   #              global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
+   #              saver.restore(sess, ckpt.model_checkpoint_path)
+   #              print('Loading success, global_step is %s' % global_step)
+   #          else:
+   #              print('No checkpoint file found')
+    '''
+    prediction = sess.run(vgg.softmax,feed_dict={vgg.x:input_data.get_one_img(sess,picPath,224,224)})
+    print(prediction)
+
+
 if __name__=='__main__':
-    train()
+    # train()
+    predict()
