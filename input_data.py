@@ -108,7 +108,7 @@ def load_style_and_path(imgs,labels,filePath,shape):
         imgs.append(os.path.join(filePath,file))
         labels.append(shape)
 
-isMac = False
+isMac = True
 def get_img_files():
     train_imgs = []
     train_labels = []

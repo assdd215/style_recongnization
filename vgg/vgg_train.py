@@ -2,6 +2,7 @@
 import tensorflow as tf
 import numpy as np
 import input_data
+import os
 
 learning_rate = 0.0005
 
@@ -97,6 +98,7 @@ def train():
 
     vgg = Vgg16(npyPath)
     sess = tf.Session()
+    saver = tf.train.Saver()
     writer = tf.summary.FileWriter('graph/', sess.graph)
     sess.run(tf.global_variables_initializer())
     coord = tf.train.Coordinator()
@@ -115,6 +117,10 @@ def train():
                 val_loss,val_acc = sess.run([vgg.loss,vgg.acc],
                                                    feed_dict={vgg.x:val_imgs_batch,vgg.y_:val_label_batch})
                 print("Step:%d, val loss = %.2f, val acc = %.2f%%" % (step,val_loss,val_acc * 100))
+
+            if step != 0 and (step % 2000 == 0 or (step + 1) == MAX_STEP):
+                checkpoint_path = os.path.join("checkpoint_dir","model.ckpt")
+                saver.save(sess, checkpoint_path, global_step=step)
     except Exception as e:
         print(e)
         coord.request_stop()
@@ -122,28 +128,21 @@ def train():
         coord.request_stop()
     coord.join(threads)
 
+
 def predict():
     picPath = "391.jpg"
-    # img = input_data.get_one_img(picPath,IMG_W,IMG_H)
-    # img = tf.image.per_image_standardization(img)
     vgg = Vgg16(npyPath)
     saver = tf.train.Saver()
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
-    '''
-    这里可以写加载模型
-    #      with tf.Session() as sess:
-   #
-   #          print("Reading checkpoints...")
-   #          ckpt = tf.train.get_checkpoint_state(train_logs_dir)
-   #          if ckpt and ckpt.model_checkpoint_path:
-   #              global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
-   #              saver.restore(sess, ckpt.model_checkpoint_path)
-   #              print('Loading success, global_step is %s' % global_step)
-   #          else:
-   #              print('No checkpoint file found')
-    '''
-    prediction = sess.run(vgg.softmax,feed_dict={vgg.x:input_data.get_one_img(sess,picPath,224,224)})
+    ckpt = tf.train.get_checkpoint_state("checkpoint_dir/")
+    if ckpt and ckpt.model_checkpoint_path:
+        print("start load model")
+        global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
+        saver.restore(sess, ckpt.model_checkpoint_path)
+        print('Loading success, global_step is %s' % global_step)
+    prediction = sess.run(vgg.softmax,
+                          feed_dict={vgg.x:input_data.get_one_img(sess,picPath,224,224)})
     print(prediction)
 
 
