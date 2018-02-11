@@ -1,17 +1,14 @@
-# cats-vs-dogs
-数据集来自 kaggle 上的一个竞赛：[Dogs vs. Cats](https://www.kaggle.com/c/dogs-vs-cats-redux-kernels-edition)，训练集有25000张，猫狗各占一半。测试集12500张，没有标定是猫还是狗。
+#由于与需求不太一样，暂时先搁置
+基于TensorFlow工具实现的CNN图像分类神经网络。
+使用vgg作为模型预训练处理。
+关注的py文件为：
+####vgg/vgg_train.py
+####input_data.py
+####test/utils.py
+####test/patch_pic.py
 
-下面是文件夹的结构，train2里面有两个文件夹，分别是猫和狗，每个文件夹里是12500张图。
-
-```
-├── test [12500 images]
-├── test.zip
-├── test2
-│   └── test -> ../test/
-├── train [25000 images]
-├── train.zip
-└── train2
-    ├── cat [12500 images]
-    └── dog [12500 images]
-```
-
+代码实现涵盖内容：
+1、tensorFlow的基本使用，包括构建神经网络，模型的加载与保存，tensorboard的使用等。
+2、vgg的预训练模型导入。
+3、作为附属知识的简单爬虫。
+  
