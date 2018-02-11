@@ -39,6 +39,7 @@ class Vgg16:
         with tf.name_scope(name='fc6'):
             self.fc6 = tf.layers.dense(self.flatten,256,tf.nn.relu,name='fc6')
 
+
         with tf.name_scope(name='softmax'):
             softmax_W = self.weight_variable([256,4],name='softmax_W')
             softmax_b = self.biases_variable([4],name='softmax_b')
@@ -49,12 +50,13 @@ class Vgg16:
 
         with tf.name_scope(name='loss'):
             cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=self.softmax,labels=self.y_)
-            self.loss = tf.reduce_mean(cross_entropy,name='loss')
+            # self.loss = tf.reduce_mean(cross_entropy, name='loss')
+            self.loss = tf.reduce_mean(cross_entropy,name='loss') + tf.contrib.layers.l2_regularizer(0.5)(softmax_W)
             tf.summary.scalar('loss',self.loss)
 
 
         with tf.name_scope(name='train_op'):
-            self.train_op = tf.train.AdamOptimizer(learning_rate).minimize(self.loss)
+            self.train_op = tf.train.RMSPropOptimizer(learning_rate).minimize(self.loss)
 
         with tf.name_scope(name='acc'):
             correct = tf.equal(tf.argmax(self.softmax,axis=1),tf.argmax(self.y_,axis=1))
@@ -75,6 +77,7 @@ class Vgg16:
 
     def weight_variable(self,shape,name="weight",stddev = 0.1):  #stddev  表示标准差
         initializer = tf.contrib.layers.xavier_initializer()
+
         return tf.Variable(initializer(shape),name=name)
 
     def biases_variable(self,shape, name="bias", value=0.1):
@@ -147,5 +150,5 @@ def predict():
 
 
 if __name__=='__main__':
-    # train()
-    predict()
+    train()
+    # predict()
