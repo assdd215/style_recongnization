@@ -3,6 +3,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import math
+from PIL import Image
 
 # you need to change this to your data directory
 train_dir = '/Users/aria/MyDocs/cat_vs_dogs/'
@@ -99,12 +100,11 @@ def get_batch(image, label, image_W, image_H, batch_size, capacity):
 
     return image_batch, label_batch       #一个批量的图片batch和label batch  图片为[-1,width,height,channels]  label为[batch_size,1]
 
-# baseFilePath = '/Users/aria/MyDocs/pics/'
-
-baseFilePath = 'D:\\train_data\\'
+baseFilePath = '/Users/aria/MyDocs/pics/'
+# baseFilePath = 'D:\\train_data\\'
 def load_style_and_path(imgs,labels,filePath,shape):
-    # filePath = filePath + "/"
-    filePath = filePath + "\\"
+    filePath = filePath + "/"
+    # filePath = filePath + "\\"
     for file in os.listdir(filePath):
         if file == '.DS_Store':
             continue
@@ -118,29 +118,29 @@ def get_img_files():
     test_labels = []
 
     #制作
-    # load_style_and_path(train_imgs, train_labels, str(baseFilePath + "train/2_狂野"), [1, 0, 0, 0])
-    # load_style_and_path(train_imgs, train_labels, str(baseFilePath + "train/4_甜美"), [0, 1, 0, 0])
-    # load_style_and_path(train_imgs,train_labels,str(baseFilePath + "train/5_小清新"),[0,0,1,0])
-    # load_style_and_path(train_imgs,train_labels,baseFilePath + "train/6_冷艳",[0,0,0,1])
+    load_style_and_path(train_imgs, train_labels, str(baseFilePath + "train/2_狂野"), [1, 0, 0, 0])
+    load_style_and_path(train_imgs, train_labels, str(baseFilePath + "train/4_甜美"), [0, 1, 0, 0])
+    load_style_and_path(train_imgs,train_labels,str(baseFilePath + "train/5_小清新"),[0,0,1,0])
+    load_style_and_path(train_imgs,train_labels,baseFilePath + "train/6_冷艳",[0,0,0,1])
 
-    load_style_and_path(train_imgs, train_labels, str(baseFilePath + "train\\2_狂野"), [1, 0, 0, 0])
-    load_style_and_path(train_imgs, train_labels, str(baseFilePath + "train\\4_甜美"), [0, 1, 0, 0])
-    load_style_and_path(train_imgs,train_labels,str(baseFilePath + "train\\5_小清新"),[0,0,1,0])
-    load_style_and_path(train_imgs,train_labels,baseFilePath + "train\\6_冷艳",[0,0,0,1])
+    # load_style_and_path(train_imgs, train_labels, str(baseFilePath + "train\\2_狂野"), [1, 0, 0, 0])
+    # load_style_and_path(train_imgs, train_labels, str(baseFilePath + "train\\4_甜美"), [0, 1, 0, 0])
+    # load_style_and_path(train_imgs,train_labels,str(baseFilePath + "train\\5_小清新"),[0,0,1,0])
+    # load_style_and_path(train_imgs,train_labels,baseFilePath + "train\\6_冷艳",[0,0,0,1])
 
     result_img = np.array(train_imgs)
     result_labels = np.array(train_labels)
 
     ##制作测试集
-    # load_style_and_path(test_imgs, test_labels, baseFilePath + "test/2_狂野", [1, 0, 0, 0])
-    # load_style_and_path(test_imgs, test_labels, baseFilePath + "test/4_甜美", [0, 1, 0, 0])
-    # load_style_and_path(test_imgs, test_labels, baseFilePath + "test/5_小清新", [0, 0, 1, 0])
-    # load_style_and_path(test_imgs, test_labels, baseFilePath + "test/6_冷艳", [0, 0, 0, 1])
-
-    load_style_and_path(test_imgs, test_labels, baseFilePath + "test\\2_狂野", [1, 0, 0, 0])
-    load_style_and_path(test_imgs, test_labels, baseFilePath + "test\\4_甜美", [0, 1, 0, 0])
-    load_style_and_path(test_imgs, test_labels, baseFilePath + "test\\5_小清新", [0, 0, 1, 0])
-    load_style_and_path(test_imgs, test_labels, baseFilePath + "test\\6_冷艳", [0, 0, 0, 1])
+    load_style_and_path(test_imgs, test_labels, baseFilePath + "test/2_狂野", [1, 0, 0, 0])
+    load_style_and_path(test_imgs, test_labels, baseFilePath + "test/4_甜美", [0, 1, 0, 0])
+    load_style_and_path(test_imgs, test_labels, baseFilePath + "test/5_小清新", [0, 0, 1, 0])
+    load_style_and_path(test_imgs, test_labels, baseFilePath + "test/6_冷艳", [0, 0, 0, 1])
+    #
+    # load_style_and_path(test_imgs, test_labels, baseFilePath + "test\\2_狂野", [1, 0, 0, 0])
+    # load_style_and_path(test_imgs, test_labels, baseFilePath + "test\\4_甜美", [0, 1, 0, 0])
+    # load_style_and_path(test_imgs, test_labels, baseFilePath + "test\\5_小清新", [0, 0, 1, 0])
+    # load_style_and_path(test_imgs, test_labels, baseFilePath + "test\\6_冷艳", [0, 0, 0, 1])
 
     result_img_test = np.array(test_imgs)
     result_labels_test = np.array(test_labels)
@@ -162,3 +162,34 @@ def get_img_batch(imgs,labels,w = 256,h = 256,batch_size = 32,capacity = 2000):
     image_batch = tf.cast(image_batch,tf.float32)
     return image_batch,label_batch
 
+def get_one_img(sess,imgPath,w = 224,h = 224):
+    image_content = tf.read_file(imgPath)
+    image = tf.image.decode_jpeg(image_content,channels=3)
+    image = tf.image.resize_image_with_crop_or_pad(image,w,h)
+    image = tf.cast(image,tf.float32)
+    image = tf.image.per_image_standardization(image)
+    img = sess.run(image)
+    img = np.reshape(img,[-1,w,h,3])
+    return img
+    # def get_one_image(file_dir):
+    #     """
+    #     Randomly pick one image from test data
+    #     Return: ndarray
+    #     """
+    #     from PIL import Image
+    #     import matplotlib.pyplot as plt
+    #     test = []
+    #     for file in os.listdir(file_dir):
+    #         test.append(file_dir + file)
+    #     print('There are %d test pictures\n' % (len(test)))
+    #
+    #     n = len(test)
+    #     ind = np.random.randint(0, n)
+    #     print(ind)
+    #     img_test = test[ind]
+    #
+    #     image = Image.open(img_test)
+    #     plt.imshow(image)
+    #     image = image.resize([208, 208])
+    #     image = np.array(image)
+    #     return image
