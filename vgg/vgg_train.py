@@ -3,7 +3,7 @@ import tensorflow as tf
 import numpy as np
 import input_data
 
-learning_rate = 0.001
+learning_rate = 0.0005
 
 class Vgg16:
     def __init__(self,vgg_npy_path = None):
@@ -53,7 +53,7 @@ class Vgg16:
 
 
         with tf.name_scope(name='train_op'):
-            self.train_op = tf.train.RMSPropOptimizer(learning_rate).minimize(self.loss)
+            self.train_op = tf.train.AdamOptimizer(learning_rate).minimize(self.loss)
 
         with tf.name_scope(name='acc'):
             correct = tf.equal(tf.argmax(self.softmax,axis=1),tf.argmax(self.y_,axis=1))
@@ -85,7 +85,7 @@ IMG_W = 224
 IMG_H = 224
 BATCH_SIZE = 32
 CAPACITY = 2000
-MAX_STEP = 1000
+MAX_STEP = 5000
 
 # npyPath = "/Users/aria/MyDocs/npy/vgg16.npy"
 npyPath = "D:\\train_data\\npy\\vgg16.npy"
@@ -107,19 +107,21 @@ def train():
         for step in range(MAX_STEP):
             tra_images,tra_labels = sess.run([train_batch,train_label_batch])
             _,tra_loss,tra_acc = sess.run([vgg.train_op,vgg.loss,vgg.acc],feed_dict={vgg.x:tra_images,vgg.y_:tra_labels})
-            if step % 20 == 0:
+            if step % 50 == 0:
                 print("step:%d , tra loss = %.2f, tra acc = %.2f%%"%(step,tra_loss,tra_acc * 100))
+                merged = sess.run(vgg.merged,feed_dict={vgg.x:tra_images,vgg.y_:tra_labels})
+                writer.add_summary(merged,step)
             if step % 100 == 0 or step + 1 == MAX_STEP:
                 val_imgs_batch, val_label_batch = sess.run([test_batch,test_label_batch])
-                val_loss,val_acc,merged = sess.run([vgg.loss,vgg.acc,vgg.merged],
+                val_loss,val_acc = sess.run([vgg.loss,vgg.acc],
                                                    feed_dict={vgg.x:val_imgs_batch,vgg.y_:val_label_batch})
                 print("Step:%d, val loss = %.2f, val acc = %.2f%%" % (step,val_loss,val_acc * 100))
-                writer.add_summary(merged,step)
-    except Exception:
+    except Exception as e:
+        print(e)
         coord.request_stop()
     finally:
         coord.request_stop()
-    coord.join()
+    coord.join(threads)
 
 if __name__=='__main__':
     train()
