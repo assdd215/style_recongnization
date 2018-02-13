@@ -103,7 +103,7 @@ def train():
                                                               batch_size=BATCH_SIZE, capacity=CAPACITY)
     test_batch, test_label_batch = input.get_img_batch(test_img, test_label, w=IMG_W, h=IMG_H,
                                                             batch_size=BATCH_SIZE, capacity=CAPACITY)
-
+    print("data loaded")
     vgg = Vgg16(npyPath)
     sess = tf.Session()
     saver = tf.train.Saver()

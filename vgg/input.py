@@ -52,6 +52,7 @@ def get_img_batch(imgs,labels,w = 224,h = 224,batch_size = 32,capacity = 2000):
                                                                      batch_size=batch_size,num_threads=64,
                                                                      capacity=capacity,min_after_dequeue=capacity - 1)
     image_batch = tf.cast(image_batch,tf.float32)
+
     return image_batch,label_batch
 
 def get_one_img(sess,imgPath,w = 224,h = 224):
