@@ -1,16 +1,21 @@
 #encoding=utf-8
 import tensorflow as tf
 import numpy as np
-import input_data
+import input
 import os
 
+"""
+使用vgg16修改的模型实现的猫狗大战神经网络
+
+"""
 learning_rate = 0.0005
+N_CLASSES = 2
 
 class Vgg16:
     def __init__(self,vgg_npy_path = None):
         self.data_dict = np.load(vgg_npy_path,encoding="latin1").item()
         self.x = tf.placeholder(tf.float32,[None,224,224,3])
-        self.y_ = tf.placeholder(tf.float32,[None,4])
+        self.y_ = tf.placeholder(tf.float32,[None,N_CLASSES])
         # pre-trained VGG layers are fixed in fine-tune
         conv1_1 = self.conv_layer(self.x, "conv1_1")
         conv1_2 = self.conv_layer(conv1_1, "conv1_2")
@@ -41,8 +46,8 @@ class Vgg16:
 
 
         with tf.name_scope(name='softmax'):
-            softmax_W = self.weight_variable([256,4],name='softmax_W')
-            softmax_b = self.biases_variable([4],name='softmax_b')
+            softmax_W = self.weight_variable([256,N_CLASSES],name='softmax_W')
+            softmax_b = self.biases_variable([N_CLASSES],name='softmax_b')
             tf.summary.histogram('softmax/W',softmax_W)
             tf.summary.histogram('softmax/b',softmax_b)
 
@@ -93,10 +98,10 @@ MAX_STEP = 5000
 npyPath = "/Users/aria/MyDocs/npy/vgg16.npy"
 # npyPath = "D:\\train_data\\npy\\vgg16.npy"
 def train():
-    train, train_label, test_img, test_label = input_data.get_img_files()
-    train_batch, train_label_batch = input_data.get_img_batch(train, train_label, w=IMG_W, h=IMG_H,
+    train, train_label, test_img, test_label = input.get_img_files()
+    train_batch, train_label_batch = input.get_img_batch(train, train_label, w=IMG_W, h=IMG_H,
                                                               batch_size=BATCH_SIZE, capacity=CAPACITY)
-    test_batch, test_label_batch = input_data.get_img_batch(test_img, test_label, w=IMG_W, h=IMG_H,
+    test_batch, test_label_batch = input.get_img_batch(test_img, test_label, w=IMG_W, h=IMG_H,
                                                             batch_size=BATCH_SIZE, capacity=CAPACITY)
 
     vgg = Vgg16(npyPath)
@@ -133,7 +138,7 @@ def train():
 
 
 def predict():
-    picPath = "391.jpg"
+    picPath = "8.jpg"
     vgg = Vgg16(npyPath)
     saver = tf.train.Saver()
     sess = tf.Session()
@@ -145,10 +150,10 @@ def predict():
         saver.restore(sess, ckpt.model_checkpoint_path)
         print('Loading success, global_step is %s' % global_step)
     prediction = sess.run(vgg.softmax,
-                          feed_dict={vgg.x:input_data.get_one_img(sess,picPath,224,224)})
+                          feed_dict={vgg.x:input.get_one_img(sess,picPath,224,224)})
     print(prediction)
 
 
 if __name__=='__main__':
-    # train()
-    predict()
+    train()
+    # predict()
