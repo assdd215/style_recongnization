@@ -1,6 +1,7 @@
 logs/
-.idea
+.idea/
 *.pyc
 result_model/
 checkpoint_dir/
 vgg/graph/
+facenet/model/
