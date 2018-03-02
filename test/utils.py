@@ -20,6 +20,20 @@ def changeRawToForm(str):
     str = str.replace("%2F","/")
     return str
 
+def changeRawToDict(str):
+    str = changeRawToForm(str)
+    str = str.split('\n')
+    array = {}
+    for item in str:
+        item = item.split(':')
+        array[item[0]] = item[1]
+    return array
+
+def translateFormData(str):
+    str = str.replace("%20"," ")
+    str = str.replace("%2F","/")
+    return str
+
 def getPicUrl(html):
     try:
         result = requests.get(html)
@@ -42,7 +56,4 @@ def resizeImage(fileName,shape,newFileName):
         writer.close()
     image.save(newFileName, 'JPEG', quality=shape[2])
 
-# fileName = "/Users/aria/MyDocs/pics/1_童颜/1.jpg"
-#
-# resizeImage(fileName,[256,256,120])
 

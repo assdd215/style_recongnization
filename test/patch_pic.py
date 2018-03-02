@@ -40,6 +40,6 @@ def resizePic(basePath):
 # resizePic("/Users/aria/MyDocs/pics/6_冷艳_测试/")
 # resizePic("/Users/aria/MyDocs/pics/5_小清新_测试/")
 # resizePic("/Users/aria/MyDocs/pics/4_甜美_测试/")
-resizePic("/Users/aria/MyDocs/pics/2_狂野_测试/")
+resizePic("/Users/aria/MyDocs/pics/test/2_狂野/")
 
 
