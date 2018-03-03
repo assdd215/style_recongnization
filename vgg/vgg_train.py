@@ -6,10 +6,9 @@ import os
 
 """
 使用vgg16修改的模型实现的猫狗大战神经网络
-
 """
-learning_rate = 0.0005
-N_CLASSES = 2
+learning_rate = 0.0005  # 模型的学习率
+N_CLASSES = 2  # 分类的数量
 
 class Vgg16:
     def __init__(self,vgg_npy_path = None):
@@ -41,9 +40,9 @@ class Vgg16:
         pool5 = self.max_pool(conv5_3, 'pool5')
 
         self.flatten = tf.reshape(pool5,[-1,7*7*512])
+
         with tf.name_scope(name='fc6'):
             self.fc6 = tf.layers.dense(self.flatten,256,tf.nn.relu,name='fc6')
-
 
         with tf.name_scope(name='softmax'):
             softmax_W = self.weight_variable([256,N_CLASSES],name='softmax_W')
@@ -58,7 +57,6 @@ class Vgg16:
             # self.loss = tf.reduce_mean(cross_entropy, name='loss')
             self.loss = tf.reduce_mean(cross_entropy,name='loss') + tf.contrib.layers.l2_regularizer(0.5)(softmax_W)
             tf.summary.scalar('loss',self.loss)
-
 
         with tf.name_scope(name='train_op'):
             self.train_op = tf.train.RMSPropOptimizer(learning_rate).minimize(self.loss)
@@ -91,11 +89,11 @@ class Vgg16:
 
 IMG_W = 224
 IMG_H = 224
-BATCH_SIZE = 32
+BATCH_SIZE = 32  # 每次取的batch数
 CAPACITY = 2000
-MAX_STEP = 5000
+MAX_STEP = 500
 
-npyPath = "/Users/aria/MyDocs/npy/vgg16.npy"
+npyPath = "/Users/aria/MyDocs/npy/vgg16.npy"  # vgg16的预训练模型
 # npyPath = "D:\\train_data\\npy\\vgg16.npy"
 def train():
     train, train_label, test_img, test_label = input.get_img_files()
@@ -107,7 +105,7 @@ def train():
     vgg = Vgg16(npyPath)
     sess = tf.Session()
     saver = tf.train.Saver()
-    writer = tf.summary.FileWriter('graph/', sess.graph)
+    writer = tf.summary.FileWriter('graph/', sess.graph)  #训练后的tensorboard保存目录
     sess.run(tf.global_variables_initializer())
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(sess=sess, coord=coord)
@@ -126,7 +124,7 @@ def train():
                                                    feed_dict={vgg.x:val_imgs_batch,vgg.y_:val_label_batch})
                 print("Step:%d, val loss = %.2f, val acc = %.2f%%" % (step,val_loss,val_acc * 100))
 
-            if step != 0 and (step % 2000 == 0 or (step + 1) == MAX_STEP):
+            if step + 1 == MAX_STEP:
                 checkpoint_path = os.path.join("checkpoint_dir","model.ckpt")
                 saver.save(sess, checkpoint_path, global_step=step)
     except Exception as e:
@@ -137,15 +135,15 @@ def train():
     coord.join(threads)
 
 
-#这里用于测试，适当修改或者往predict_dir投入要测试的图片即可
+# 这里用于测试，适当修改或者往predict_dir放入要测试的图片即可
 def predict_in_files():
-    img_path = "predict_dir"
+    img_path = "predict_dir"    # 用于测试的文件目录
     imgs,labels = input.get_predict_files(img_path)
     vgg = Vgg16(npyPath)
     saver = tf.train.Saver()
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
-    ckpt = tf.train.get_checkpoint_state("checkpoint_dir/")   #模型的话在百度盘上下载或者自己准备
+    ckpt = tf.train.get_checkpoint_state("checkpoint_dir/")   # 训练好的模型存放位置。模型的话在百度盘上下载或者自己训练
     if ckpt and ckpt.model_checkpoint_path:
         print("start load model")
         global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]

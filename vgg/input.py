@@ -5,11 +5,12 @@ import numpy as np
 import os
 
 
-baseFilePath = '/Users/aria/MyDocs/cat_vs_dogs/'
+baseFilePath = '/Users/aria/MyDocs/cat_vs_dogs/' # 猫狗大战的训练数据
 
 isMac = True
 
 
+# 获取训练数据下的图片与对应的label。 训练集用6250张是因为猫狗大战的总训练集是12500张，从中随机抓6250张做训练集 剩下的6250张用于做准确率测试
 def get_img_files(train_size = 6250):
     cat_imgs = []
     cat_labels = []
@@ -40,9 +41,10 @@ def get_img_files(train_size = 6250):
         test_labels.append(cat_labels[i])
         test_imgs.append(dog_imgs[i])
         test_labels.append(dog_labels[i])
-    return train_imgs,train_labels,test_imgs,test_labels  #cat [1,0]  dog [0,1]
+    return train_imgs,train_labels,test_imgs,test_labels  # cat [1,0]  dog [0,1]
 
 
+# 根据传入图片和label整合成batch返回。batch的作用是每次从训练集中取出batch_size个图片与label投入训练
 def get_img_batch(imgs,labels,w = 224,h = 224,batch_size = 32,capacity = 2000):
     image = tf.cast(imgs,dtype=tf.string)
     label = tf.convert_to_tensor(labels,dtype=tf.int16)
@@ -60,6 +62,7 @@ def get_img_batch(imgs,labels,w = 224,h = 224,batch_size = 32,capacity = 2000):
     return image_batch,label_batch
 
 
+# 获取一个图片并将它转换成矩阵数组便于投入训练
 def get_one_img(sess,imgPath,w = 224,h = 224):
     image_content = tf.read_file(imgPath)
     image = tf.image.decode_jpeg(image_content,channels=3)
@@ -70,6 +73,8 @@ def get_one_img(sess,imgPath,w = 224,h = 224):
     img = np.reshape(img,[-1,w,h,3])
     return img
 
+
+# 输入要进行预测的图片的文件夹，返回图片矩阵和标签矩阵
 def get_predict_files(imgpath):
     if os.path.exists(imgpath) == False:
         print("error path")
@@ -79,7 +84,6 @@ def get_predict_files(imgpath):
     labels = []
     for file in files:
         temp = file.split('.')
-        # if file.split(['.'])[1] != 'jpg' and file.split(['.'])[1] != 'png' and file.split(['.'])[1] != 'jpeg':
         if temp[-1] != 'jpg' and temp[-1] != 'png' and temp[-1] != 'jpeg':
             continue
         img = misc.imread(os.path.join(imgpath, file), mode='RGB')
