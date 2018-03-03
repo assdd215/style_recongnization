@@ -137,23 +137,30 @@ def train():
     coord.join(threads)
 
 
-def predict():
-    picPath = "8.jpg"
+#这里用于测试，适当修改或者往predict_dir投入要测试的图片即可
+def predict_in_files():
+    img_path = "predict_dir"
+    imgs,labels = input.get_predict_files(img_path)
     vgg = Vgg16(npyPath)
     saver = tf.train.Saver()
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
-    ckpt = tf.train.get_checkpoint_state("checkpoint_dir/")
+    ckpt = tf.train.get_checkpoint_state("checkpoint_dir/")   #模型的话在百度盘上下载或者自己准备
     if ckpt and ckpt.model_checkpoint_path:
         print("start load model")
         global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
         saver.restore(sess, ckpt.model_checkpoint_path)
         print('Loading success, global_step is %s' % global_step)
-    prediction = sess.run(vgg.softmax,
-                          feed_dict={vgg.x:input.get_one_img(sess,picPath,224,224)})
-    print(prediction)
+    predictions = sess.run(vgg.softmax,
+                           feed_dict={vgg.x: imgs})
+
+    for i in range(len(predictions)):
+        if predictions[i][0] >= predictions[i][1]:
+            print("fileName:%s    prediction:cat   value:%f   other value:%f"%(labels[i],predictions[i][0],predictions[i][1]))
+        else:
+            print("fileName:%s    prediction:dog   value:%f   other value:%f"%(labels[i],predictions[i][1],predictions[i][0]))
 
 
 if __name__=='__main__':
-    train()
-    # predict()
+    # train()
+    predict_in_files()

@@ -5,3 +5,5 @@ result_model/
 checkpoint_dir/
 vgg/graph/
 facenet/model/
+vgg/checkpoint_dir/
+vgg/predict_dir/*

@@ -1,5 +1,6 @@
 #encoding=utf-8
 import tensorflow as tf
+from scipy import misc
 import numpy as np
 import os
 
@@ -7,6 +8,8 @@ import os
 baseFilePath = '/Users/aria/MyDocs/cat_vs_dogs/'
 
 isMac = True
+
+
 def get_img_files(train_size = 6250):
     cat_imgs = []
     cat_labels = []
@@ -37,7 +40,8 @@ def get_img_files(train_size = 6250):
         test_labels.append(cat_labels[i])
         test_imgs.append(dog_imgs[i])
         test_labels.append(dog_labels[i])
-    return train_imgs,train_labels,test_imgs,test_labels
+    return train_imgs,train_labels,test_imgs,test_labels  #cat [1,0]  dog [0,1]
+
 
 def get_img_batch(imgs,labels,w = 224,h = 224,batch_size = 32,capacity = 2000):
     image = tf.cast(imgs,dtype=tf.string)
@@ -55,15 +59,6 @@ def get_img_batch(imgs,labels,w = 224,h = 224,batch_size = 32,capacity = 2000):
 
     return image_batch,label_batch
 
-def get_one_img(sess,imgPath,w = 224,h = 224):
-    image_content = tf.read_file(imgPath)
-    image = tf.image.decode_jpeg(image_content,channels=3)
-    image = tf.image.resize_image_with_crop_or_pad(image,w,h)
-    image = tf.cast(image,tf.float32)
-    image = tf.image.per_image_standardization(image)
-    img = sess.run(image)
-    img = np.reshape(img,[-1,w,h,3])
-    return img
 
 def get_one_img(sess,imgPath,w = 224,h = 224):
     image_content = tf.read_file(imgPath)
@@ -74,3 +69,22 @@ def get_one_img(sess,imgPath,w = 224,h = 224):
     img = sess.run(image)
     img = np.reshape(img,[-1,w,h,3])
     return img
+
+def get_predict_files(imgpath):
+    if os.path.exists(imgpath) == False:
+        print("error path")
+        return 
+    files = os.listdir(imgpath)
+    imgs = []
+    labels = []
+    for file in files:
+        temp = file.split('.')
+        # if file.split(['.'])[1] != 'jpg' and file.split(['.'])[1] != 'png' and file.split(['.'])[1] != 'jpeg':
+        if temp[-1] != 'jpg' and temp[-1] != 'png' and temp[-1] != 'jpeg':
+            continue
+        img = misc.imread(os.path.join(imgpath, file), mode='RGB')
+        img = misc.imresize(img,(224,224),interp='bilinear')
+        imgs.append(img)
+        labels.append(file)
+    print("图片加载完毕")
+    return np.array(imgs),np.array(labels)
