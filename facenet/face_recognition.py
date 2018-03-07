@@ -3,12 +3,16 @@ import tensorflow as tf
 import numpy as np
 import os
 import facenet
+import json
 import preProcess_mtcnn
+import types
 
 model = "model/20170512-110547.pb"
-pic1 = "/Users/aria/MyDocs/pics/resize_anchors/1154752421.jpg"
-pic2 = "/Users/aria/MyDocs/pics/resize_anchors/1168973115.jpg"
-database_file = "model/database.npy"
+database_file = "/Users/aria/PycharmProjects/style_recongnize/facenet/model/database.npy"
+pic1 = "imgs/shayu.jpg"
+pic2 = "imgs/shayu2.jpg"
+model = "/Users/aria/PycharmProjects/style_recongnize/facenet/model/20170512-110547.pb"
+n = 100   # 表示选择的相似数量
 
 
 class SimpleData(object):
@@ -29,11 +33,17 @@ class SimpleData(object):
         self.target = target
 
 
-#测试用函数 检验两张图之间的距离
-def compare():
-    imgs_data = preProcess_mtcnn.get_processed_imgs()
+def data_2_json(obj):
+    return {"key":obj.key,
+            "value":obj.value,
+            "target":obj.target}
 
-    sample_data = np.array([imgs_data[pic1],imgs_data[pic2]])
+# 测试用函数 检验两张图之间的距离
+def compare():
+    imgs_data = [pic1,pic2]
+    result = preProcess_mtcnn.load_img(imgs_data)
+    labels,sample_data = changeDictToArray(result)
+
 
     with tf.Graph().as_default():
         with tf.Session() as sess:
@@ -45,19 +55,22 @@ def compare():
             feed_dict = {images_placeholder:sample_data,phase_train_placeholder:False}
             emb = sess.run(embeddings,feed_dict=feed_dict)
             dist = np.sqrt(np.sum(np.square(np.subtract(emb[0,:] , emb[1,:]))))
+            print("pic1: %s, pic2 : %s"%(pic1,pic2))
             print("得到的欧式距离为：%f"% dist)
 
-n = 100  #表示选择的推荐数量
-def main():
+
+def main(test_path = "imgs/322.jpg",top_n = 100):
+
     if os.path.exists(database_file) == False:
         print("当前没有数据文件，先进行制作")
         embedDatabaseAndSaveAsNpy()
+    preProcess_mtcnn.check_all_in_database(test_path)
     current_emb = np.load(database_file)
-    #将用户的关注整理成列表,现在是这么理解的，数据库不变，用户的关注列表相当于是从数据库中抓取的图片来进行选择对比
-    sample_labels = load_labels("imgs")
+    # 将用户的关注整理成列表,现在是这么理解的，数据库不变，用户的关注列表相当于是从数据库中抓取的图片来进行选择对比
+    sample_labels = load_labels(test_path) # 读取要测试的图片列表，这里只读取每张图片的名称，因为图片已经在数据库中了没必要在进行一次特征向量映射。
     all_result = []
-    mDataDict = changeNpToDict(current_emb)
-    #这个整理的代码感觉不是很优雅。 暂时先这样把
+    mDataDict = changeNpToDict(current_emb) # 把数据库的图片矩阵转换成key-value的字典
+    # 这个整理的代码感觉不是很优雅。 暂时先这样把
     for sample in sample_labels:
         sample_emb = mDataDict[sample].astype('float64')
         result = []
@@ -66,25 +79,31 @@ def main():
                 continue
             compare_data = mDataDict[compare_index].astype('float64')
             dist = np.sqrt(np.sum(np.square(np.subtract(sample_emb,compare_data))))
-            data = SimpleData(float(compare_index),dist,float(sample))
+            data = SimpleData(float(compare_index),dist,float(sample)) # 计算两张图片之间的欧氏距离
             result.append(data)
             all_result.append(data)
-    all_result.sort(cmp=cmp)  #对拿到的欧氏距离数组进行排序
+    all_result.sort(cmp=cmp)  # 对拿到的欧氏距离数组进行排序
     output = []
     count = 0
     for item in all_result:
         for input_label in sample_labels:
-            if float(item.key) == float(input_label): #排除已存在用户的关注列表中的选项
+            if float(item.key) == float(input_label): # 排除已存在用户的关注列表中的选项
                 continue
-        for exist_item in output:   #排除已存在已选择列表中的选项
+        for exist_item in output:   # 排除已存在已选择列表中的选项
             if exist_item.key == item.key:
                 continue
+        # 这里对key 和 target 进行str处理
+        item.key = str(item.key).split('.')[0] + ".jpg"
+        item.target = str(item.key).split('.')[0] + ".jpg"
         output.append(item)
         count = count + 1
-        if count == n:
+        if count == int(top_n):
             break
-    for item in output:
-        print("key:%f,     value:%f,     target:%f"%(item.key,item.value,item.target))
+    # for item in output:
+    #     print("key:%f,     value:%f,     target:%f"%(item.key,item.value,item.target))
+
+    return output
+
 
 def cmp(data1,data2):
     if data1.value == data2.value:
@@ -123,37 +142,30 @@ def loadNpy():
     return database
 
 
-def embedPic(pics):
-    with tf.Graph().as_default():
-        with tf.Session() as sess:
-            facenet.load_model(model)
-            images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
-            embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")  # 将图片矩阵映射为128的特征向量
-            phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
-            feed_dict = {images_placeholder:pics,phase_train_placeholder:False}
-            emb = sess.run(embeddings,feed_dict=feed_dict)
-            return emb
-
-
 def load_labels(img_paths):
-    labels = os.listdir(img_paths)
     output = []
-    for label in labels:
-        if label == '.DS_Store':
-            continue
-        output.append(label.split('.')[0])
-
+    if type(img_paths) is types.ListType:
+        for label in img_paths:
+            output.append(label.split('/')[-1].split('.')[0])
+    elif os.path.isfile(img_paths):
+        output.append(img_paths.split('/')[-1].split('.')[0])
+    else:
+        labels = os.listdir(img_paths)
+        for label in labels:
+            if label == '.DS_Store':
+                continue
+            output.append(label.split('.')[0])
     return np.array(output)
 
 
-#这里用于更新数据库的npy便于后面的使用
+# 这里用于更新数据库的npy便于后面的使用
 def embedDatabaseAndSaveAsNpy():
     print("start load imgs...")
-    imgs_dict = preProcess_mtcnn.load_imgs(use_to_save=False)  #先把图片保存为
+    imgs_dict = preProcess_mtcnn.load_imgs(use_to_save=False)  #
     img_index,img_content = changeDictToArray(imgs_dict)
     print("img loaded")
     print("start embedding...")
-    img_emb = embedPic(img_content)
+    img_emb = preProcess_mtcnn.embedPic(img_content)
     print("img emded")
     print("start saving...")
     np_soft = np.column_stack([img_index,img_emb])
@@ -161,4 +173,8 @@ def embedDatabaseAndSaveAsNpy():
     print("saved")
 
 
-main()
+if __name__ == '__main__':
+    # result = main(["/Users/aria/MyDocs/pics/anchors/2563590156.jpg","/Users/aria/MyDocs/pics/anchors/318.jpg"],top_n = 5)
+    result = main("/Users/aria/MyDocs/pics/anchors/2563590156.jpg",5)
+    print("result:")
+    print(json.dumps(result,default=data_2_json))
