@@ -13,7 +13,7 @@ import types
 model = "/Users/aria/PycharmProjects/style_recongnize/facenet/model/20170512-110547.pb"
 base_img_path = "/Users/aria/MyDocs/pics/anchors"
 save_path = "/Users/aria/MyDocs/pics/resize_anchors"
-image_size = 160
+image_size = 160 # 根据facenet论文介绍，图像的质量对识别结果影响不大，因此这个值不要去改动它，改动会导致结果不正确。
 margin = 44
 gpu_memory_fraction = 1.0
 
@@ -35,7 +35,7 @@ def load_imgs(img_path = base_img_path,use_to_save = True):
         if image == '.DS_Store':
             continue
         aligned = mtcnn(os.path.join(img_path, image),minsize,pnet,rnet,onet,threshold,factor)
-        if aligned == None:
+        if aligned is None:
             img_paths.remove(image)
             continue
         if use_to_save:
@@ -62,7 +62,7 @@ def load_img(files):
         if image == '.DS_Store':
             continue
         aligned = mtcnn(image,minsize,pnet,rnet,onet,threshold,factor)
-        if aligned == None:
+        if aligned is None:
             files.remove(image)
             continue
         prewhitened = facenet.prewhiten(aligned)  # 图片进行白化
@@ -98,8 +98,10 @@ def save_imgs():
     result = load_imgs()
     print("load pic end. result size: %d"%len(result))
     for image_path in result:
+        # path要进行处理一下
         img = Image.fromarray(result[image_path].astype('uint8'))
-        img.save(os.path.join(save_path,image_path))
+        img_path = os.path.join(save_path,image_path.split('/')[-1] + ".jpg")
+        img.save(img_path)
     print("save end")
 
 def get_processed_imgs():
@@ -132,7 +134,7 @@ def check_all_in_database(img_path):
     database_labels = os.listdir(base_img_path)
     if type(img_path) is types.ListType:
         for image_path in img_path:
-            image = image_path.split('/')[-1]
+            image = image_path.split('/')[-1]  # 只保留文件名
             if image in database_labels:
                 print("image in database:%s"% image)
             else:
@@ -178,7 +180,7 @@ def check_all_in_database(img_path):
             labels = []
             for image in unembed:
                 aligned = mtcnn(image,minsize,pnet,rnet,onet,threshold,factor)
-                if aligned == None:
+                if aligned is None:
                     unembed.remove(image)
                     continue
                 prewhitened = facenet.prewhiten(aligned)

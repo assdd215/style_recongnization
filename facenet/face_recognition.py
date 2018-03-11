@@ -9,10 +9,9 @@ import types
 
 model = "model/20170512-110547.pb"
 database_file = "/Users/aria/PycharmProjects/style_recongnize/facenet/model/database.npy"
-pic1 = "imgs/shayu.jpg"
-pic2 = "imgs/shayu2.jpg"
+pic1 = "imgs/318.jpg"
+pic2 = "imgs/319.jpg"
 model = "/Users/aria/PycharmProjects/style_recongnize/facenet/model/20170512-110547.pb"
-n = 100   # 表示选择的相似数量
 
 
 class SimpleData(object):
@@ -71,36 +70,39 @@ def main(test_path = "imgs/322.jpg",top_n = 100):
     all_result = []
     mDataDict = changeNpToDict(current_emb) # 把数据库的图片矩阵转换成key-value的字典
     # 这个整理的代码感觉不是很优雅。 暂时先这样把
+
     for sample in sample_labels:
-        sample_emb = mDataDict[sample].astype('float64')
-        result = []
-        for compare_index in mDataDict:
-            if compare_index == sample:
-                continue
-            compare_data = mDataDict[compare_index].astype('float64')
-            dist = np.sqrt(np.sum(np.square(np.subtract(sample_emb,compare_data))))
-            data = SimpleData(float(compare_index),dist,float(sample)) # 计算两张图片之间的欧氏距离
-            result.append(data)
-            all_result.append(data)
+        if mDataDict.has_key(sample):
+            sample_emb = mDataDict[sample].astype('float64')
+            result = []
+            for compare_index in mDataDict:
+                if compare_index == sample:
+                    continue
+                compare_data = mDataDict[compare_index].astype('float64')
+                dist = np.sqrt(np.sum(np.square(np.subtract(sample_emb,compare_data))))
+                data = SimpleData(float(compare_index),dist,float(sample)) # 计算两张图片之间的欧氏距离
+                result.append(data)
+                all_result.append(data)
+
     all_result.sort(cmp=cmp)  # 对拿到的欧氏距离数组进行排序
     output = []
     count = 0
     for item in all_result:
         for input_label in sample_labels:
-            if float(item.key) == float(input_label): # 排除已存在用户的关注列表中的选项
+            if float(item.key) == float(input_label):  # 排除已存在用户的关注列表中的选项
                 continue
         for exist_item in output:   # 排除已存在已选择列表中的选项
             if exist_item.key == item.key:
                 continue
         # 这里对key 和 target 进行str处理
         item.key = str(item.key).split('.')[0] + ".jpg"
-        item.target = str(item.key).split('.')[0] + ".jpg"
+        item.target = str(item.target).split('.')[0] + ".jpg"
         output.append(item)
         count = count + 1
         if count == int(top_n):
             break
-    # for item in output:
-    #     print("key:%f,     value:%f,     target:%f"%(item.key,item.value,item.target))
+    for item in output:
+        print("key:%s,     value:%s,     target:%s"%(item.key,item.value,item.target))
 
     return output
 
@@ -161,20 +163,18 @@ def load_labels(img_paths):
 # 这里用于更新数据库的npy便于后面的使用
 def embedDatabaseAndSaveAsNpy():
     print("start load imgs...")
-    imgs_dict = preProcess_mtcnn.load_imgs(use_to_save=False)  #
+    imgs_dict = preProcess_mtcnn.load_imgs(use_to_save=False)
     img_index,img_content = changeDictToArray(imgs_dict)
     print("img loaded")
     print("start embedding...")
     img_emb = preProcess_mtcnn.embedPic(img_content)
     print("img emded")
     print("start saving...")
-    np_soft = np.column_stack([img_index,img_emb])
+    np_soft = np.column_stack([img_index,img_emb[0:len(img_index)]])
     np.save("model/database.npy",np_soft)
     print("saved")
 
 
 if __name__ == '__main__':
-    # result = main(["/Users/aria/MyDocs/pics/anchors/2563590156.jpg","/Users/aria/MyDocs/pics/anchors/318.jpg"],top_n = 5)
-    result = main("/Users/aria/MyDocs/pics/anchors/2563590156.jpg",5)
-    print("result:")
-    print(json.dumps(result,default=data_2_json))
+    imgs = ["imgs/1235843763.jpg","imgs/318.jpg"]
+    result = main(imgs,10)
